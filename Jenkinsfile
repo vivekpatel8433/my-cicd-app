@@ -1,5 +1,9 @@
 pipeline {
-    agent any
+    agent {
+        docker {
+            image 'node:22.17.1'
+        }
+    }
 
     stages {
         stage('Install') {
