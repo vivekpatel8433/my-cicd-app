@@ -6,8 +6,9 @@ pipeline {
     }
 
     environment {
-        AWS_REGION = 'us-east-1'
-        ECR_REPO = '497086312619.dkr.ecr.us-east-1.amazonaws.com/react-cicd-app'
+        AWS_REGION   = 'us-east-1'
+        ECR_REGISTRY = '497086312619.dkr.ecr.us-east-1.amazonaws.com'
+        ECR_REPO     = "${ECR_REGISTRY}/react-cicd-app"
     }
 
     options {
@@ -23,7 +24,7 @@ pipeline {
 
         stage('Checkout Code') {
             steps {
-                git 'https://github.com/VivekPatel8433/my-cicd-app'
+                git branch: 'main', url: 'https://github.com/VivekPatel8433/my-cicd-app'
             }
         }
 
@@ -63,7 +64,7 @@ pipeline {
             }
         }
 
-        stage('Login to ECR') {
+        stage('Login, Tag & Push to ECR') {
             steps {
                 withCredentials([[
                     $class: 'AmazonWebServicesCredentialsBinding',
@@ -73,18 +74,12 @@ pipeline {
                 ]]) {
                     sh '''
                     aws ecr get-login-password --region $AWS_REGION \
-                    | docker login --username AWS --password-stdin $ECR_REPO
+                    | docker login --username AWS --password-stdin $ECR_REGISTRY
+
+                    docker tag react-app:latest $ECR_REPO:latest
+                    docker push $ECR_REPO:latest
                     '''
                 }
-            }
-        }
-
-        stage('Push to ECR') {
-            steps {
-                sh '''
-                docker tag react-app:latest $ECR_REPO:latest
-                docker push $ECR_REPO:latest
-                '''
             }
         }
     }
