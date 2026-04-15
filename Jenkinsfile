@@ -10,7 +10,23 @@ pipeline {
         ECR_REPO = '497086312619.dkr.ecr.us-east-1.amazonaws.com/react-cicd-app'
     }
 
+    options {
+        skipDefaultCheckout(true)
+    }
+
     stages {
+        stage('Clean Workspace') {
+            steps {
+                deleteDir()
+            }
+        }
+
+        stage('Checkout Code') {
+            steps {
+                git 'https://github.com/VivekPatel8433/my-cicd-app'
+            }
+        }
+
         stage('Install') {
             steps {
                 sh 'npm install'
@@ -30,15 +46,15 @@ pipeline {
         }
 
         stage('Check Docker') {
-             steps {
-              sh 'docker --version'
+            steps {
+                sh 'docker --version'
             }
         }
 
         stage('Check AWS CLI') {
             steps {
-              sh 'aws --version'
-             }
+                sh 'aws --version'
+            }
         }
 
         stage('Build Docker Image') {
